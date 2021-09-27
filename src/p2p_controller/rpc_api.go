@@ -1,4 +1,4 @@
-package src
+package p2p_controller
 
 import "context"
 

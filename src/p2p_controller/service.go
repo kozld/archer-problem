@@ -1,4 +1,4 @@
-package src
+package p2p_controller
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/protocol"
-	"github.com/libp2p/go-libp2p-gorpc"
+	rpc "github.com/libp2p/go-libp2p-gorpc"
 )
 
 type Service struct {
@@ -38,7 +38,7 @@ func (s *Service) SetupRPC() error {
 	return nil
 }
 
-func (s *Service) StartMessaging(ctx context.Context) {
+func (s *Service) Start(ctx context.Context) {
 	ticker := time.NewTicker(time.Second * 1)
 	defer ticker.Stop()
 
@@ -54,25 +54,25 @@ func (s *Service) StartMessaging(ctx context.Context) {
 }
 
 func (s *Service) Message(message string) {
-	peers := s.host.Peerstore().Peers()
-	var replies = make([]*Envelope, len(peers))
-
-	errs := s.rpcClient.MultiCall(
-		Ctxts(len(peers)),
-		peers,
-		MessageService,
-		MessageServiceFunc,
-		Envelope{Message: message},
-		CopyEnvelopesToIfaces(replies),
-	)
-
-	for i, err := range errs {
-		if err != nil {
-			fmt.Printf("Peer %s returned error: %-v\n", peers[i].Pretty(), err)
-		} else {
-			fmt.Printf("Peer %s echoed: %s\n", peers[i].Pretty(), replies[i].Message)
-		}
-	}
+	//peers := s.host.Peerstore().Peers()
+	//var replies = make([]*Envelope, len(peers))
+	//
+	//errs := s.rpcClient.Call(
+	//	Ctxts(len(peers)),
+	//	peers,
+	//	MessageService,
+	//	MessageServiceFunc,
+	//	Envelope{Message: message},
+	//	CopyEnvelopesToIfaces(replies),
+	//)
+	//
+	//for i, err := range errs {
+	//	if err != nil {
+	//		fmt.Printf("Peer %s returned error: %-v\n", peers[i].Pretty(), err)
+	//	} else {
+	//		fmt.Printf("Peer %s echoed: %s\n", peers[i].Pretty(), replies[i].Message)
+	//	}
+	//}
 }
 
 func (s *Service) ReceiveMessage(envelope Envelope) Envelope {

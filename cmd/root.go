@@ -2,11 +2,16 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/multiformats/go-multiaddr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 
-	"github.com/stdi0/archer-problem/src"
+	"github.com/stdi0/archer-problem/src/models"
+	"github.com/stdi0/archer-problem/src/p2p_controller"
 )
 
 const (
@@ -15,6 +20,8 @@ const (
 	// DefaultTimeout is default timeout in seconds after program
 	// started to run messaging
 	DefaultTimeout = 3
+
+	ArcherAddressKey = "address"
 )
 
 var (
@@ -37,15 +44,41 @@ to quickly create a Cobra application.`,
 	}
 
 	// length is number of archers
-	length  int8
+	length int
 	// timeout in seconds after program started to run messaging
-	timeout int8
+	timeout int
 )
 
 func run(cmd *cobra.Command, args []string) {
-	archers := src.NewArchers(length)
-	go archers.InitArcher()
-	archers.InitArcher()
+	lineOfArchers := models.NewLineOfArchers()
+
+	var neighborPeer multiaddr.Multiaddr
+	for i := 0; i < length; i++ {
+		c, h := p2p_controller.NewP2PController(neighborPeer)
+
+		addr := fmt.Sprintf("%s/p2p/%s", h.Addrs()[0].String(), h.ID().String())
+		fmt.Printf("[DEBUG] %s\n", addr)
+
+		multiAddr, err := multiaddr.NewMultiaddr(addr)
+		if err != nil {
+			panic(err)
+		}
+
+		a := models.NewArcher(c)
+		a.SaveToMemory(ArcherAddressKey, multiAddr)
+		go a.Burn()
+
+		lineOfArchers.AddArcher(a)
+		neighborPeer = multiAddr
+	}
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, os.Interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
+	<-ch
+
+	//archers := models.NewArchers(length)
+	//go archers.InitArcher()
+	//archers.InitArcher()
 	//time.Sleep(3 * time.Second)
 	//for _, addr := range archers.GetNodes() {
 	//	fmt.Printf("ADDR: %s\n", addr)
@@ -61,8 +94,8 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().Int8VarP(&length, "length", "l", DefaultLength, "number of archers")
-	rootCmd.PersistentFlags().Int8VarP(&timeout, "timeout", "t", DefaultTimeout, "timeout in seconds after program started to run messaging")
+	rootCmd.PersistentFlags().IntVarP(&length, "length", "l", DefaultLength, "number of archers")
+	rootCmd.PersistentFlags().IntVarP(&timeout, "timeout", "t", DefaultTimeout, "timeout in seconds after program started to run messaging")
 }
 
 // initConfig reads in config file and ENV variables if set.
