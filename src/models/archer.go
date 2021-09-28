@@ -5,7 +5,7 @@ import (
 )
 
 ///////////////////////////////////////
-//////////// ARCHER MODEL  ////////////
+// ARCHER MODEL
 ///////////////////////////////////////
 
 // NewArcher can construct new instance of Archer
@@ -19,10 +19,10 @@ type Archer struct {
 	cpu    Controller
 }
 
-// MessageTo can send message to neighbor Archer
-func (a *Archer) MessageTo(neighbor Archer, message string) {
+// Message can send message to another Archer
+func (a *Archer) Message(to Archer, message string) {
 	fmt.Println("I'm sending message")
-	a.cpu.MessageTo(neighbor, message)
+	a.cpu.Message(to, message)
 }
 
 // Fire can to fire
@@ -48,7 +48,7 @@ func (a *Archer) SaveToMemory(key string, value interface{}) {
 	a.memory[key] = value
 }
 
-// Burn can burn Archer
+// Burn can start Archer
 func (a *Archer) Burn() {
 	a.cpu.Start()
 }

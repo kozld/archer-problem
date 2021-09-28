@@ -1,4 +1,4 @@
-package p2p_controller
+package rpc
 
 import "context"
 

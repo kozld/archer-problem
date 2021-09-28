@@ -1,8 +1,12 @@
 package models
 
-// Controller is interface of Archer "brain"
+///////////////////////////////////////
+// CONTROLLER INTERFACE
+///////////////////////////////////////
+
+// Controller is interface of Archer brain
 type Controller interface {
-	MessageTo(neighbor Archer, message string)
+	Message(to Archer, message string)
 	Fire()
 	Start()
 	Stop() error
