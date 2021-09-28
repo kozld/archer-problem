@@ -8,7 +8,7 @@ const (
 )
 
 type MessageRPCAPI struct {
-	service *Service
+	service *RPCService
 }
 
 type Envelope struct {

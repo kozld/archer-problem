@@ -21,37 +21,36 @@ const (
 	// started to run messaging
 	DefaultTimeout = 3
 
+	///////////////////////////////////////////////////////////////////
+	// below are the keys that will be recorded in the archer's memory
+	///////////////////////////////////////////////////////////////////
+
+	// ArcherAddressKey is archer's own address
 	ArcherAddressKey = "address"
+	// LNeighborAddressKey is archer's left neighbor address
+	LNeighborAddressKey = "left_neighbor"
+	// RNeighborAddressKey is archer's right neighbor address
+	RNeighborAddressKey = "right_neighbor"
 )
 
 var (
 	cfgFile string
-
-	// rootCmd represents the base command when called without any subcommands
-	rootCmd = &cobra.Command{
-		Use:   "archer-problem",
-		Short: "A brief description of your application",
-		Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-		Run: run,
-		// Uncomment the following line if your bare application
-		// has an action associated with it:
-		// Run: func(cmd *cobra.Command, args []string) { },
-	}
-
 	// length is number of archers
 	length int
 	// timeout in seconds after program started to run messaging
 	timeout int
+
+	// rootCmd represents the base command when called without any subcommands
+	rootCmd = &cobra.Command{
+		Use:   "archer",
+		Short: "Short about archer",
+		Long:  `Long about archer`,
+		Run:   run,
+	}
 )
 
 func run(cmd *cobra.Command, args []string) {
-	lineOfArchers := models.NewLineOfArchers()
-
+	//lineOfArchers := models.NewLineOfArchers()
 	var neighborPeer multiaddr.Multiaddr
 	for i := 0; i < length; i++ {
 		c, h := p2p_controller.NewP2PController(neighborPeer)
@@ -65,24 +64,17 @@ func run(cmd *cobra.Command, args []string) {
 		}
 
 		a := models.NewArcher(c)
-		a.SaveToMemory(ArcherAddressKey, multiAddr)
 		go a.Burn()
 
-		lineOfArchers.AddArcher(a)
+		a.SaveToMemory(ArcherAddressKey, multiAddr)
+
+		//lineOfArchers.AddArcher(a)
 		neighborPeer = multiAddr
 	}
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	<-ch
-
-	//archers := models.NewArchers(length)
-	//go archers.InitArcher()
-	//archers.InitArcher()
-	//time.Sleep(3 * time.Second)
-	//for _, addr := range archers.GetNodes() {
-	//	fmt.Printf("ADDR: %s\n", addr)
-	//}
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

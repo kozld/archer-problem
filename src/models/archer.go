@@ -17,14 +17,12 @@ func NewArcher(controller Controller) *Archer {
 type Archer struct {
 	memory map[string]interface{}
 	cpu    Controller
-	//Host   host.Host
-	//cancel context.CancelFunc
 }
 
 // MessageTo can send message to neighbor Archer
-func (a *Archer) MessageTo(neighbor Archer) {
+func (a *Archer) MessageTo(neighbor Archer, message string) {
 	fmt.Println("I'm sending message")
-	a.cpu.MessageTo(neighbor)
+	a.cpu.MessageTo(neighbor, message)
 }
 
 // Fire can to fire
@@ -59,5 +57,4 @@ func (a *Archer) Burn() {
 func (a *Archer) Destroy() {
 	fmt.Println("I self destruct :(")
 	a.cpu.Stop()
-	//a.Host.Close()
 }

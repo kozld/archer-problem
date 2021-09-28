@@ -1,71 +1,76 @@
 package models
 
-import (
-	"container/list"
-)
-
 ///////////////////////////////////////
 ///////// ARCHERS LINKED LIST /////////
 ///////////////////////////////////////
 
 const (
-	ArcherIdKey      = "id"
-	ArcherIdFirst    = 0
-	ArcherAddressKey = "address"
+	ArcherIdKey            = "id"
+	ArcherIdFirst          = 0
+	ArcherAddressKey       = "address"
+	ArcherLeftNeighborKey  = "left_neighbor"
+	ArcherRightNeighborKey = "right_neighbor"
 )
 
 // NewLineOfArchers can construct new instance of LineOfArchers
 func NewLineOfArchers() *LineOfArchers {
-	return &LineOfArchers{list.New()}
+	return &LineOfArchers{[]*Archer{}} //list.New()
 }
 
-// LineOfArchers is a linked list of Archer
+// LineOfArchers contains list of Archer
 type LineOfArchers struct {
-	items *list.List
+	items []*Archer //*list.List
 }
 
 // AddArcher can add Archer to list
 func (l *LineOfArchers) AddArcher(archer *Archer) {
-	l.items.PushBack(archer)
+	l.items = append(l.items, archer)
 }
 
-func (l *LineOfArchers) FireEveryoneSync() {
-	///////////////////////////////////////
-	/// STAGE 1
-	///////////////////////////////////////
+//func (l *LineOfArchers) FireEveryoneSync() {
+//	///////////////////////////////////////
+//	/// STAGE 1
+//	///////////////////////////////////////
+//
+//	//el := l.items.Front()
+//	//firstLeftArcher, ok := el.Value.(Archer)
+//	//if !ok {
+//	//	panic("error interface cast")
+//	//}
+//	//
+//	//firstLeftArcher.SaveToMemory(ArcherIdKey, ArcherIdFirst)
+//
+//	//firstLeftArcher.MessageTo()
+//
+//	n := ArcherIdFirst
+//	for e := l.items.Front(); e != nil; e = e.Next() {
+//		archer, ok := e.Value.(Archer)
+//		if !ok {
+//			panic("error interface cast")
+//		}
+//
+//		archer.SaveToMemory(ArcherIdKey, n)
+//		//dataFromMemory := archer.GetFromMemory(ArcherIdKey)
+//		//archer.MessageTo()
+//
+//		n += 1
+//	}
+//
+//	///////////////////////////////////////
+//	/// STAGE 2
+//	///////////////////////////////////////
+//}
 
-	//el := l.items.Front()
-	//firstLeftArcher, ok := el.Value.(Archer)
-	//if !ok {
-	//	panic("error interface cast")
-	//}
-	//
-	//firstLeftArcher.SaveToMemory(ArcherIdKey, ArcherIdFirst)
-
-	//firstLeftArcher.MessageTo()
-
-	n := ArcherIdFirst
-	for e := l.items.Front(); e != nil; e = e.Next() {
-		archer, ok := e.Value.(Archer)
-		if !ok {
-			panic("error interface cast")
-		}
-
-		archer.SaveToMemory(ArcherIdKey, n)
-		//dataFromMemory := archer.GetFromMemory(ArcherIdKey)
-		//archer.MessageTo()
-
-		n += 1
-	}
-
-	///////////////////////////////////////
-	/// STAGE 2
-	///////////////////////////////////////
-}
-
-func (l *LineOfArchers) linkArchers() {
-
-}
+//func (l *LineOfArchers) linkArchers() {
+//	for _, a := range l.items {
+//
+//	}
+//	//for e := l.items.Front(); e != nil; e = e.Next() {
+//	//	if e.Prev() != nil {
+//	//		e.Prev().
+//	//	}
+//	//}
+//}
 
 // InitArcher initializes archer
 //func initArcher() {
