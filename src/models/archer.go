@@ -20,7 +20,7 @@ type Archer struct {
 }
 
 // Message can send message to another Archer
-func (a *Archer) Message(to Archer, message string) {
+func (a *Archer) Message(to Archer, message interface{}) {
 	fmt.Println("I'm sending message")
 	a.cpu.Message(to, message)
 }

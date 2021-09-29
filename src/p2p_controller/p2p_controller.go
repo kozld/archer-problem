@@ -2,6 +2,7 @@ package p2p_controller
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/libp2p/go-libp2p"
@@ -26,12 +27,21 @@ func NewP2PController(neighborPeer multiaddr.Multiaddr) (models.Controller, host
 	if err != nil {
 		panic(err)
 	}
-	rpc := rpc.NewRPCService(host, "/p2p/rpc/archers")
-	if err = rpc.Setup(); err != nil {
+
+	r := rpc.NewRPCService(host, "/p2p/rpc/archers")
+	ctrl := &P2PController{
+		Host:         host,
+		Cancel:       cancel,
+		NeighborPeer: neighborPeer,
+		RPC:          r,
+	}
+
+	handler := rpc.NewHandler(ctrl)
+	if err = r.Setup(handler); err != nil {
 		panic(err)
 	}
 
-	return &P2PController{host, cancel, neighborPeer, rpc}, host
+	return ctrl, host
 }
 
 // P2PController implements the Controller interface
@@ -42,8 +52,12 @@ type P2PController struct {
 	RPC          *rpc.RPCService
 }
 
-// Message can send message to another Archer
-func (c *P2PController) Message(to models.Archer, message string) {
+// Message can send command to another Archer
+func (c *P2PController) Message(to models.Archer, message interface{}) {
+	command, ok := message.(rpc.Command)
+	if !ok {
+		panic("error interface cast")
+	}
 	valueFromMemory := to.GetFromMemory("address")
 	if multiAddr, ok := valueFromMemory.(multiaddr.Multiaddr); !ok {
 		panic("error interface cast")
@@ -52,13 +66,14 @@ func (c *P2PController) Message(to models.Archer, message string) {
 		if err != nil {
 			panic(err)
 		}
-		c.RPC.Message(addrInfo.ID, message)
+		out := c.RPC.Message(addrInfo.ID, command)
+		fmt.Printf("Got out: %s", out)
 	}
 }
 
 // Fire can to fire
 func (c *P2PController) Fire() {
-
+	fmt.Println("Fire from controller")
 }
 
 // Start can start controller

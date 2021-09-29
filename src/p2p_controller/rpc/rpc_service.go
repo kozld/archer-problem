@@ -10,6 +10,7 @@ import (
 )
 
 type RPCService struct {
+	handler   *Handler
 	rpcServer *rpc.Server
 	rpcClient *rpc.Client
 	host      host.Host
@@ -23,7 +24,8 @@ func NewRPCService(host host.Host, protocol protocol.ID) *RPCService {
 	}
 }
 
-func (s *RPCService) Setup() error {
+func (s *RPCService) Setup(handler *Handler) error {
+	s.handler = handler
 	s.rpcServer = rpc.NewServer(s.host, s.protocol)
 
 	messageRPCAPI := MessageRPCAPI{service: s}
@@ -36,24 +38,25 @@ func (s *RPCService) Setup() error {
 	return nil
 }
 
-func (s *RPCService) Message(dest peer.ID, message string) {
-	var msg Message
+func (s *RPCService) Message(dest peer.ID, message Command) string {
+	var msg Command
 	err := s.rpcClient.Call(
 		dest,
 		MessageService,
 		MessageServiceFunc,
-		Message(message),
+		message,
 		&msg,
 	)
 
 	if err != nil {
-		fmt.Printf("Peer %s returned error: %-v\n", dest, err)
-	} else {
-		fmt.Printf("Peer %s echoed: %s\n", dest, msg)
+		return fmt.Sprintf("Peer %s returned error: %-v\n", dest, err)
 	}
+
+	return fmt.Sprintf("Peer %s echoed: %s\n", dest, msg)
 }
 
-func (s *RPCService) ReceiveMessage(msg Message) Message {
+func (s *RPCService) ReceiveMessage(msg Command) Command {
+	s.handler.Handle(msg)
 	return msg //Message(fmt.Sprintf("Peer %s echoing: %s", s.host.ID(), msg))
 }
 

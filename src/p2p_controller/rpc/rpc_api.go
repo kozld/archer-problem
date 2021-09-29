@@ -1,6 +1,8 @@
 package rpc
 
-import "context"
+import (
+	"context"
+)
 
 const (
 	MessageService     = "MessageRPCAPI"
@@ -11,13 +13,12 @@ type MessageRPCAPI struct {
 	service *RPCService
 }
 
-//type Envelope struct {
-//	Message string
-//}
+type Command struct {
+	Cmd  string
+	Args []interface{}
+}
 
-type Message string
-
-func (m *MessageRPCAPI) Message(ctx context.Context, in Message, out *Message) error {
+func (m *MessageRPCAPI) Message(ctx context.Context, in Command, out *Command) error {
 	*out = m.service.ReceiveMessage(in)
 	return nil
 }

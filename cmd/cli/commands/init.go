@@ -12,6 +12,7 @@ import (
 
 	"github.com/stdi0/archer-problem/src/models"
 	"github.com/stdi0/archer-problem/src/p2p_controller"
+	"github.com/stdi0/archer-problem/src/p2p_controller/rpc"
 )
 
 const (
@@ -78,7 +79,9 @@ var initCmd = &cobra.Command{
 		if !ok {
 			panic("error interface cast")
 		}
-		firstLeftArcher.Message(*rightNeighbor, "hello")
+
+		msg := rpc.Command{"define_your_number", []interface{}{}}
+		firstLeftArcher.Message(*rightNeighbor, msg)
 
 		ch := make(chan os.Signal, 1)
 		signal.Notify(ch, os.Interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
