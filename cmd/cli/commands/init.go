@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/multiformats/go-multiaddr"
 	"github.com/spf13/cobra"
@@ -18,10 +19,10 @@ const (
 
 	// ArcherAddressKey is archer's own address
 	ArcherAddressKey = "address"
-	// LNeighborAddressKey is archer's left neighbor address
-	LNeighborAddressKey = "left_neighbor"
-	// RNeighborAddressKey is archer's right neighbor address
-	RNeighborAddressKey = "right_neighbor"
+	// LNeighborKey is archer's left neighbor
+	LNeighborKey = "left_neighbor"
+	// RNeighborKey is archer's right neighbor
+	RNeighborKey = "right_neighbor"
 )
 
 // init
@@ -30,8 +31,8 @@ func init() {
 }
 
 var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Create a squad of archers",
+	Use:   "start",
+	Short: "Init a squad of archers & doing sync fire",
 	Run: func(cmd *cobra.Command, args []string) {
 		var archers = make([]*models.Archer, 0, length)
 		var peerAddresses = make([]multiaddr.Multiaddr, 0, length)
@@ -39,9 +40,15 @@ var initCmd = &cobra.Command{
 		// create a squad of archers
 		var neighborPeer multiaddr.Multiaddr
 		for i := 0; i < length; i++ {
+			// use p2p controller implementation
 			c, h := p2p_controller.NewP2PController(neighborPeer)
 			archer := models.NewArcher(c)
-			go archer.Burn()
+
+			fmt.Println("Burning new archer...")
+			archer.Burn()
+			fmt.Println("Sleep 2 seconds...")
+			time.Sleep(2 * time.Second)
+
 			archers = append(archers, archer)
 
 			addr := fmt.Sprintf("%s/p2p/%s", h.Addrs()[0].String(), h.ID().String())
@@ -58,12 +65,21 @@ var initCmd = &cobra.Command{
 		for id, archer := range archers {
 			archer.SaveToMemory(ArcherAddressKey, peerAddresses[id])
 			if id > 0 {
-				archer.SaveToMemory(LNeighborAddressKey, peerAddresses[id-1])
+				archer.SaveToMemory(LNeighborKey, archers[id-1])
 			}
 			if id < len(archers)-1 {
-				archer.SaveToMemory(RNeighborAddressKey, peerAddresses[id+1])
+				archer.SaveToMemory(RNeighborKey, archers[id+1])
 			}
 		}
+
+		// doing sync fire!
+		firstLeftArcher := archers[0]
+		valueFromMemory := firstLeftArcher.GetFromMemory(RNeighborKey)
+		rightNeighbor, ok := valueFromMemory.(*models.Archer)
+		if !ok {
+			panic("error interface cast")
+		}
+		firstLeftArcher.Message(*rightNeighbor, "hello")
 
 		ch := make(chan os.Signal, 1)
 		signal.Notify(ch, os.Interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)

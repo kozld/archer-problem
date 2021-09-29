@@ -37,31 +37,31 @@ func (s *RPCService) Setup() error {
 }
 
 func (s *RPCService) Message(dest peer.ID, message string) {
-	var reply = make([]*Envelope, 1)
+	var msg Message
 	err := s.rpcClient.Call(
 		dest,
 		MessageService,
 		MessageServiceFunc,
-		Envelope{Message: message},
-		CopyEnvelopesToIfaces(reply),
+		Message(message),
+		&msg,
 	)
 
 	if err != nil {
 		fmt.Printf("Peer %s returned error: %-v\n", dest, err)
 	} else {
-		fmt.Printf("Peer %s echoed: %s\n", dest, reply[0].Message)
+		fmt.Printf("Peer %s echoed: %s\n", dest, msg)
 	}
 }
 
-func (s *RPCService) ReceiveMessage(envelope Envelope) Envelope {
-	return Envelope{Message: fmt.Sprintf("Peer %s echoing: %s", s.host.ID(), envelope.Message)}
+func (s *RPCService) ReceiveMessage(msg Message) Message {
+	return msg //Message(fmt.Sprintf("Peer %s echoing: %s", s.host.ID(), msg))
 }
 
-func CopyEnvelopesToIfaces(in []*Envelope) []interface{} {
-	ifaces := make([]interface{}, len(in))
-	for i := range in {
-		in[i] = &Envelope{}
-		ifaces[i] = in[i]
-	}
-	return ifaces
-}
+//func CopyEnvelopesToIfaces(in []*Envelope) []interface{} {
+//	ifaces := make([]interface{}, len(in))
+//	for i := range in {
+//		in[i] = &Envelope{}
+//		ifaces[i] = in[i]
+//	}
+//	return ifaces
+//}

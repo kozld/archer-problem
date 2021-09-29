@@ -11,11 +11,13 @@ type MessageRPCAPI struct {
 	service *RPCService
 }
 
-type Envelope struct {
-	Message string
-}
+//type Envelope struct {
+//	Message string
+//}
 
-func (m *MessageRPCAPI) Message(ctx context.Context, in Envelope, out *Envelope) error {
+type Message string
+
+func (m *MessageRPCAPI) Message(ctx context.Context, in Message, out *Message) error {
 	*out = m.service.ReceiveMessage(in)
 	return nil
 }

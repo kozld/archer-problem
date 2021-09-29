@@ -2,11 +2,7 @@ package p2p_controller
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/host"
@@ -31,6 +27,9 @@ func NewP2PController(neighborPeer multiaddr.Multiaddr) (models.Controller, host
 		panic(err)
 	}
 	rpc := rpc.NewRPCService(host, "/p2p/rpc/archers")
+	if err = rpc.Setup(); err != nil {
+		panic(err)
+	}
 
 	return &P2PController{host, cancel, neighborPeer, rpc}, host
 }
@@ -45,8 +44,8 @@ type P2PController struct {
 
 // Message can send message to another Archer
 func (c *P2PController) Message(to models.Archer, message string) {
-	multiAddrIface := to.GetFromMemory("address")
-	if multiAddr, ok := multiAddrIface.(multiaddr.Multiaddr); !ok {
+	valueFromMemory := to.GetFromMemory("address")
+	if multiAddr, ok := valueFromMemory.(multiaddr.Multiaddr); !ok {
 		panic("error interface cast")
 	} else {
 		addrInfo, err := peer.AddrInfoFromP2pAddr(multiAddr)
@@ -71,23 +70,10 @@ func (c *P2PController) Start() {
 		}
 		go discover.Discover(context.Background(), c.Host, dht, "archers/msg")
 	}
-
-	ch := make(chan os.Signal, 1)
-
-	signal.Notify(ch, os.Interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
-	<-ch
-
-	fmt.Printf("\rExiting...\n")
-
-	c.Cancel()
-
-	if err := c.Stop; err != nil {
-		panic(err)
-	}
-	os.Exit(0)
 }
 
 // Stop can stop controller
 func (c *P2PController) Stop() error {
+	c.Cancel()
 	return c.Host.Close()
 }
