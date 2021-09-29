@@ -35,7 +35,6 @@ var initCmd = &cobra.Command{
 	Short: "Init a squad of archers & doing sync fire",
 	Run: func(cmd *cobra.Command, args []string) {
 		var archers = make([]*models.Archer, 0, length)
-		var peerAddresses = make([]multiaddr.Multiaddr, 0, length)
 
 		// create a squad of archers
 		var neighborPeer multiaddr.Multiaddr
@@ -57,13 +56,13 @@ var initCmd = &cobra.Command{
 			if err != nil {
 				panic(err)
 			}
-			peerAddresses = append(peerAddresses, multiAddr)
+			// save own address to memory
+			archer.SaveToMemory(ArcherAddressKey, multiAddr)
 			neighborPeer = multiAddr
 		}
 
 		// get to know the neighbors
 		for id, archer := range archers {
-			archer.SaveToMemory(ArcherAddressKey, peerAddresses[id])
 			if id > 0 {
 				archer.SaveToMemory(LNeighborKey, archers[id-1])
 			}
