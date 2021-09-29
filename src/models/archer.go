@@ -38,13 +38,13 @@ func (a *Archer) DoNothing() {
 
 // GetFromMemory can remember data from Archer memory
 func (a *Archer) GetFromMemory(key string) interface{} {
-	fmt.Printf("I remember data from memory")
+	fmt.Println("I remember data from memory")
 	return a.memory[key]
 }
 
 // SaveToMemory can remember data in Archer memory
 func (a *Archer) SaveToMemory(key string, value interface{}) {
-	fmt.Printf("I remember data in memory")
+	fmt.Println("I remember data in memory")
 	a.memory[key] = value
 }
 
